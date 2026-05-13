@@ -1,0 +1,886 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>MyFitness</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+<!-- Chart.js -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<!-- Alpine.js -->
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/alpinejs/3.13.5/cdn.min.js"></script>
+<link rel="stylesheet" href="FitnessStyle.css">
+</head>
+<body>
+
+<!-- ══════════════════════════════════════
+     TOAST
+══════════════════════════════════════ -->
+<div id="toast"></div>
+
+<!-- ══════════════════════════════════════
+     AUTH MODALS
+══════════════════════════════════════ -->
+<!-- SIGNUP -->
+<div class="modal-overlay" id="modal-signup">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal('modal-signup')">✕</button>
+    <div class="modal-title">JOIN MY<span style="color:var(--accent)">FITNESS</span></div>
+    <div class="modal-sub">Create your account to start tracking</div>
+    <div class="error-msg" id="signup-err"></div>
+    <div class="form-row">
+      <div class="form-group">
+        <label>First Name</label>
+        <input id="su-fname" type="text" placeholder="Alex"/>
+      </div>
+      <div class="form-group">
+        <label>Last Name</label>
+        <input id="su-lname" type="text" placeholder="Smith"/>
+      </div>
+    </div>
+    <div class="form-group">
+      <label>Email</label>
+      <input id="su-email" type="email" placeholder="alex@email.com"/>
+    </div>
+    <div class="form-group">
+      <label>Password</label>
+      <input id="su-pass" type="password" placeholder="Min 6 characters"/>
+    </div>
+    <div class="divider">Your stats</div>
+    <div class="form-row">
+      <div class="form-group">
+        <label>Age</label>
+        <input id="su-age" type="number" placeholder="25" min="10" max="100"/>
+      </div>
+      <div class="form-group">
+        <label>Gender</label>
+        <select id="su-gender">
+          <option value="">Select</option>
+          <option>Male</option>
+          <option>Female</option>
+          <option>Other</option>
+        </select>
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label>Weight (kg)</label>
+        <input id="su-weight" type="number" placeholder="70" min="30" max="300"/>
+      </div>
+      <div class="form-group">
+        <label>Height (cm)</label>
+        <input id="su-height" type="number" placeholder="170" min="100" max="250"/>
+      </div>
+    </div>
+    <div class="form-group">
+      <label>Daily Calorie Goal (kcal)</label>
+      <input id="su-cals" type="number" placeholder="500" min="100" max="3000"/>
+      <div class="form-hint">How many calories you want to burn per day</div>
+    </div>
+    <button class="btn btn-primary" style="width:100%;justify-content:center;margin-top:6px" onclick="signUp()">Create Account →</button>
+    <div class="modal-footer">Already have an account? <a onclick="switchModal('modal-signup','modal-login')">Sign in</a></div>
+  </div>
+</div>
+
+<!-- LOGIN -->
+<div class="modal-overlay" id="modal-login">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal('modal-login')">✕</button>
+    <div class="modal-title">WELCOME<span style="color:var(--accent)"> BACK</span></div>
+    <div class="modal-sub">Sign in to continue your journey</div>
+    <div class="error-msg" id="login-err"></div>
+    <div class="form-group">
+      <label>Email</label>
+      <input id="li-email" type="email" placeholder="alex@email.com"/>
+    </div>
+    <div class="form-group">
+      <label>Password</label>
+      <input id="li-pass" type="password" placeholder="Your password"/>
+    </div>
+    <button class="btn btn-primary" style="width:100%;justify-content:center;margin-top:14px" onclick="logIn()">Sign In →</button>
+    <div class="modal-footer">No account? <a onclick="switchModal('modal-login','modal-signup')">Create one</a></div>
+  </div>
+</div>
+
+<!-- LOG WORKOUT MODAL -->
+<div class="modal-overlay" id="modal-log">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal('modal-log')">✕</button>
+    <div class="modal-title">LOG <span style="color:var(--accent)">WORKOUT</span></div>
+    <div class="modal-sub">Record your activity</div>
+    <div class="workout-type-grid">
+      <button class="wtype-btn" onclick="selectType(this,'Running')"><span class="wt-ico">🏃</span>Running</button>
+      <button class="wtype-btn" onclick="selectType(this,'Cycling')"><span class="wt-ico">🚴</span>Cycling</button>
+      <button class="wtype-btn" onclick="selectType(this,'Swimming')"><span class="wt-ico">🏊</span>Swimming</button>
+      <button class="wtype-btn" onclick="selectType(this,'Gym')"><span class="wt-ico">🏋️</span>Gym</button>
+      <button class="wtype-btn" onclick="selectType(this,'Yoga')"><span class="wt-ico">🧘</span>Yoga</button>
+      <button class="wtype-btn" onclick="selectType(this,'Walking')"><span class="wt-ico">🚶</span>Walking</button>
+    </div>
+    <input type="hidden" id="log-type" value=""/>
+    <div class="form-row">
+      <div class="form-group">
+        <label>Duration (minutes)</label>
+        <input id="log-dur" type="number" placeholder="30" min="1" max="600" oninput="autoCalc()"/>
+      </div>
+      <div class="form-group">
+        <label>Calories Burned</label>
+        <input id="log-cals" type="number" placeholder="Auto-calc"/>
+        <div class="form-hint">Leave blank to auto-calculate</div>
+      </div>
+    </div>
+    <div class="form-group">
+      <label>Date</label>
+      <input id="log-date" type="date"/>
+    </div>
+    <div class="form-group">
+      <label>Notes (optional)</label>
+      <input id="log-notes" type="text" placeholder="Felt great today!"/>
+    </div>
+    <button class="btn btn-primary" style="width:100%;justify-content:center;margin-top:6px" onclick="saveWorkout()">Save Workout ✓</button>
+  </div>
+</div>
+
+<!-- EDIT PROFILE MODAL -->
+<div class="modal-overlay" id="modal-profile">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal('modal-profile')">✕</button>
+    <div class="modal-title">EDIT <span style="color:var(--accent)">PROFILE</span></div>
+    <div class="modal-sub">Update your details</div>
+    <div class="form-row">
+      <div class="form-group">
+        <label>Age</label>
+        <input id="ep-age" type="number"/>
+      </div>
+      <div class="form-group">
+        <label>Weight (kg)</label>
+        <input id="ep-weight" type="number"/>
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label>Height (cm)</label>
+        <input id="ep-height" type="number"/>
+      </div>
+      <div class="form-group">
+        <label>Daily Calorie Goal</label>
+        <input id="ep-cals" type="number"/>
+      </div>
+    </div>
+    <button class="btn btn-primary" style="width:100%;justify-content:center;margin-top:10px" onclick="saveProfile()">Save Changes</button>
+    <div style="margin-top:16px;text-align:center;">
+      <button class="btn btn-danger btn-sm" onclick="logOut()">Log Out</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════
+     PAGE: LANDING
+══════════════════════════════════════ -->
+<div id="page-landing" class="page active">
+  <div class="land-badge">🏆 Your personal fitness companion</div>
+  <div class="land-title">MY<span>FIT</span><br>NESS</div>
+  <div class="land-sub">Track workouts, monitor calories, and crush your daily goals — all in one sleek dashboard.</div>
+  <div class="land-btns">
+    <button class="btn btn-primary" onclick="openModal('modal-signup')">Get Started Free</button>
+    <button class="btn btn-ghost" onclick="openModal('modal-login')">Sign In</button>
+  </div>
+  <div class="land-stats">
+    <div>
+      <span class="land-stat-num">500+</span>
+      <span class="land-stat-lbl">Workouts tracked</span>
+    </div>
+    <div>
+      <span class="land-stat-num">100%</span>
+      <span class="land-stat-lbl">Free to use</span>
+    </div>
+    <div>
+      <span class="land-stat-num">∞</span>
+      <span class="land-stat-lbl">Motivation</span>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════
+     PAGE: DASHBOARD
+══════════════════════════════════════ -->
+<div id="page-dashboard" class="page">
+  <nav class="navbar">
+    <div class="nav-brand">MY<span>FIT</span></div>
+    <div class="nav-links">
+      <button class="nav-link active" onclick="goTo('dashboard')">Dashboard</button>
+      <button class="nav-link" onclick="goTo('log')">Log</button>
+      <button class="nav-link" onclick="goTo('progress')">Progress</button>
+      <button class="nav-link" onclick="goTo('health')">Health</button>
+    </div>
+    <div class="nav-right">
+      <div class="nav-avatar" id="nav-avatar" onclick="openProfileModal()">A</div>
+    </div>
+  </nav>
+  <div class="main-content">
+    <div class="page-header flex-between">
+      <div>
+        <h1 id="dash-greeting">GOOD MORNING</h1>
+        <p id="dash-date" style="color:var(--muted)"></p>
+      </div>
+      <button class="btn btn-primary btn-sm" onclick="openModal('modal-log')">+ Log Workout</button>
+    </div>
+
+    <!-- Stats row -->
+    <div class="stat-grid">
+      <div class="stat-card">
+        <div class="stat-icon">🔥</div>
+        <div class="stat-value" id="stat-burned">0</div>
+        <div class="stat-label">Calories Burned Today</div>
+        <div id="stat-burned-bar" class="goal-bar-wrap">
+          <div class="goal-bar-track"><div class="goal-bar-fill" id="bar-burned" style="width:0%"></div></div>
+          <div class="goal-bar-label"><span>0%</span><span id="stat-goal-lbl">Goal: 0</span></div>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon">⏱️</div>
+        <div class="stat-value" id="stat-mins">0</div>
+        <div class="stat-label">Minutes Active Today</div>
+        <div class="stat-sub" id="stat-mins-sub">Keep moving!</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon">📅</div>
+        <div class="stat-value" id="stat-sessions">0</div>
+        <div class="stat-label">Workouts This Week</div>
+        <div class="stat-sub" id="stat-streak">Start your streak!</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon">⚡</div>
+        <div class="stat-value" id="stat-weekly">0</div>
+        <div class="stat-label">Weekly kcal Burned</div>
+        <div class="stat-sub" id="stat-weekly-goal"></div>
+      </div>
+    </div>
+
+    <!-- Dash grid -->
+    <div class="dash-grid">
+      <!-- Recent workouts -->
+      <div class="card">
+        <div class="flex-between mb-20">
+          <div class="section-title" style="margin-bottom:0">RECENT WORKOUTS</div>
+          <button class="btn btn-ghost btn-sm" onclick="goTo('log')">View All</button>
+        </div>
+        <div id="recent-list" class="workout-list">
+          <div class="empty-state">
+            <div class="es-icon">🏋️</div>
+            <p>No workouts yet. Log your first one!</p>
+          </div>
+        </div>
+      </div>
+      <!-- Ring + mini info -->
+      <div style="display:flex;flex-direction:column;gap:16px;">
+        <div class="card" style="text-align:center;">
+          <div class="section-title">DAILY GOAL</div>
+          <div class="ring-wrap">
+            <svg width="140" height="140" viewBox="0 0 140 140" class="ring">
+              <circle cx="70" cy="70" r="58" stroke="var(--border)" stroke-width="12"/>
+              <circle id="ring-circle" cx="70" cy="70" r="58" stroke="var(--accent)" stroke-width="12"
+                stroke-linecap="round" stroke-dasharray="364.4" stroke-dashoffset="364.4"
+                transform="rotate(-90 70 70)" style="transition:stroke-dashoffset .7s ease;"/>
+            </svg>
+            <div class="ring-label">
+              <div class="rval" id="ring-pct">0%</div>
+              <div class="runit">of daily goal</div>
+              <div class="rtitle" id="ring-sub">0 / 0 kcal</div>
+            </div>
+          </div>
+        </div>
+        <div class="card card-sm">
+          <div style="font-size:.8rem;color:var(--muted);text-transform:uppercase;letter-spacing:.07em;margin-bottom:10px;">Your Profile</div>
+          <div id="profile-mini" style="display:flex;flex-direction:column;gap:6px;font-size:.88rem;"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════
+     PAGE: LOG
+══════════════════════════════════════ -->
+<div id="page-log" class="page">
+  <nav class="navbar">
+    <div class="nav-brand">MY<span>FIT</span></div>
+    <div class="nav-links">
+      <button class="nav-link" onclick="goTo('dashboard')">Dashboard</button>
+      <button class="nav-link active" onclick="goTo('log')">Log</button>
+      <button class="nav-link" onclick="goTo('progress')">Progress</button>
+      <button class="nav-link" onclick="goTo('health')">Health</button>
+    </div>
+    <div class="nav-right"><div class="nav-avatar" id="nav-avatar-log" onclick="openProfileModal()">A</div></div>
+  </nav>
+  <div class="main-content">
+    <div class="page-header flex-between">
+      <div><h1>WORKOUT LOG</h1><p>All your sessions in one place</p></div>
+      <button class="btn btn-primary btn-sm" onclick="openModal('modal-log')">+ Log Workout</button>
+    </div>
+    <div class="card mb-20">
+      <div style="display:flex;gap:12px;flex-wrap:wrap;align-items:center;">
+        <select id="filter-type" style="width:auto;" onchange="renderLog()">
+          <option value="">All Types</option>
+          <option>Running</option><option>Cycling</option><option>Swimming</option>
+          <option>Gym</option><option>Yoga</option><option>Walking</option>
+        </select>
+        <select id="filter-range" style="width:auto;" onchange="renderLog()">
+          <option value="all">All Time</option>
+          <option value="week">This Week</option>
+          <option value="month">This Month</option>
+        </select>
+        <div style="margin-left:auto;font-size:.85rem;color:var(--muted);" id="log-count-lbl"></div>
+      </div>
+    </div>
+    <div id="full-log-list" class="workout-list"></div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════
+     PAGE: PROGRESS
+══════════════════════════════════════ -->
+<div id="page-progress" class="page">
+  <nav class="navbar">
+    <div class="nav-brand">MY<span>FIT</span></div>
+    <div class="nav-links">
+      <button class="nav-link" onclick="goTo('dashboard')">Dashboard</button>
+      <button class="nav-link" onclick="goTo('log')">Log</button>
+      <button class="nav-link active" onclick="goTo('progress')">Progress</button>
+      <button class="nav-link" onclick="goTo('health')">Health</button>
+    </div>
+    <div class="nav-right"><div class="nav-avatar" id="nav-avatar-prog" onclick="openProfileModal()">A</div></div>
+  </nav>
+  <div class="main-content">
+    <div class="page-header"><h1>PROGRESS</h1><p>Track your journey over time</p></div>
+
+    <div class="card mb-20">
+      <div class="flex-between mb-20">
+        <div class="section-title" style="margin-bottom:0">CALORIES BURNED — LAST 7 DAYS</div>
+        <span class="tag-pill" id="chart-total-lbl">0 kcal total</span>
+      </div>
+      <div class="chart-wrap"><canvas id="progressChart"></canvas></div>
+    </div>
+
+    <div class="progress-grid">
+      <div class="card">
+        <div class="section-title">THIS WEEK'S DAYS</div>
+        <div class="week-bar" id="week-bars"></div>
+      </div>
+      <div class="card">
+        <div class="section-title">BMI CALCULATOR</div>
+        <div id="bmi-section">
+          <div class="bmi-result" id="bmi-val">—</div>
+          <div style="font-size:.82rem;color:var(--muted);margin-bottom:4px;" id="bmi-category"></div>
+          <div class="bmi-bar">
+            <div class="bmi-needle" id="bmi-needle" style="left:0%"></div>
+          </div>
+          <div class="bmi-labels"><span>Underweight</span><span>Normal</span><span>Overweight</span><span>Obese</span></div>
+          <div style="margin-top:16px;font-size:.82rem;color:var(--muted);line-height:1.6;" id="bmi-tip"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- All-time stats -->
+    <div class="stat-grid mt-20">
+      <div class="stat-card"><div class="stat-icon">🔥</div><div class="stat-value" id="all-burned">0</div><div class="stat-label">Total kcal Burned</div></div>
+      <div class="stat-card"><div class="stat-icon">⏱️</div><div class="stat-value" id="all-mins">0</div><div class="stat-label">Total Minutes Active</div></div>
+      <div class="stat-card"><div class="stat-icon">🏅</div><div class="stat-value" id="all-sessions">0</div><div class="stat-label">Total Workouts</div></div>
+      <div class="stat-card"><div class="stat-icon">📈</div><div class="stat-value" id="all-avg">0</div><div class="stat-label">Avg kcal / Workout</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════
+     PAGE: HEALTH
+══════════════════════════════════════ -->
+<div id="page-health" class="page">
+  <nav class="navbar">
+    <div class="nav-brand">MY<span>FIT</span></div>
+    <div class="nav-links">
+      <button class="nav-link" onclick="goTo('dashboard')">Dashboard</button>
+      <button class="nav-link" onclick="goTo('log')">Log</button>
+      <button class="nav-link" onclick="goTo('progress')">Progress</button>
+      <button class="nav-link active" onclick="goTo('health')">Health</button>
+    </div>
+    <div class="nav-right"><div class="nav-avatar" id="nav-avatar-health" onclick="openProfileModal()">A</div></div>
+  </nav>
+  <div class="main-content">
+    <div class="page-header"><h1>HEALTH TIPS</h1><p>Simple habits that make a big difference</p></div>
+    <div class="health-grid">
+      <div class="health-card"><div class="hc-icon">💧</div><div class="hc-title">Stay Hydrated</div><div class="hc-text">Drink at least 8 glasses of water daily. Hydration improves performance, aids recovery, and keeps your metabolism running efficiently.</div><span class="hc-tag tag-blue">Nutrition</span></div>
+      <div class="health-card"><div class="hc-icon">😴</div><div class="hc-title">Prioritise Sleep</div><div class="hc-text">Aim for 7–9 hours per night. Sleep is when your muscles repair and grow. Poor sleep spikes cortisol and sabotages fat loss.</div><span class="hc-tag tag-lime">Recovery</span></div>
+      <div class="health-card"><div class="hc-icon">🥦</div><div class="hc-title">Eat Whole Foods</div><div class="hc-text">Build meals around vegetables, lean proteins, and complex carbs. Minimise ultra-processed foods for sustained energy and better body composition.</div><span class="hc-tag tag-green">Nutrition</span></div>
+      <div class="health-card"><div class="hc-icon">🧘</div><div class="hc-title">Manage Stress</div><div class="hc-text">Chronic stress increases cortisol, leading to fat storage and cravings. Try 10 minutes of mindfulness or deep breathing daily.</div><span class="hc-tag tag-lime">Mindset</span></div>
+      <div class="health-card"><div class="hc-icon">🏃</div><div class="hc-title">150 Min / Week</div><div class="hc-text">The WHO recommends at least 150 minutes of moderate-intensity activity per week. That's just 22 minutes a day — totally achievable!</div><span class="hc-tag tag-lime">Activity</span></div>
+      <div class="health-card"><div class="hc-icon">🍽️</div><div class="hc-title">Don't Skip Breakfast</div><div class="hc-text">A protein-rich breakfast jump-starts your metabolism, stabilises blood sugar, and reduces cravings throughout the day.</div><span class="hc-tag tag-green">Nutrition</span></div>
+      <div class="health-card"><div class="hc-icon">🦵</div><div class="hc-title">Stretch Daily</div><div class="hc-text">5–10 minutes of stretching improves flexibility, reduces injury risk, and promotes circulation. Your future self will thank you.</div><span class="hc-tag tag-lime">Recovery</span></div>
+      <div class="health-card"><div class="hc-icon">🎯</div><div class="hc-title">Set SMART Goals</div><div class="hc-text">Goals that are Specific, Measurable, Achievable, Relevant, and Time-bound are far more likely to be reached than vague intentions.</div><span class="hc-tag tag-blue">Mindset</span></div>
+      <div class="health-card"><div class="hc-icon">🏋️</div><div class="hc-title">Strength Train</div><div class="hc-text">Lifting weights 2–3× per week builds lean muscle, boosts metabolism, strengthens bones, and improves insulin sensitivity.</div><span class="hc-tag tag-green">Activity</span></div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════
+     JAVASCRIPT
+══════════════════════════════════════ -->
+<script>
+// ═══════════════════════════════════
+// STATE
+// ═══════════════════════════════════
+let state = {
+  currentUser: null,
+  workouts: [],
+  users: []
+};
+
+// Load from localStorage
+function loadState() {
+  try {
+    state.users    = JSON.parse(localStorage.getItem('mf_users')    || '[]');
+    state.workouts = JSON.parse(localStorage.getItem('mf_workouts') || '[]');
+    const uid = localStorage.getItem('mf_active');
+    if (uid) state.currentUser = state.users.find(u => u.id === uid) || null;
+  } catch(e) { console.error(e); }
+}
+function saveState() {
+  localStorage.setItem('mf_users',    JSON.stringify(state.users));
+  localStorage.setItem('mf_workouts', JSON.stringify(state.workouts));
+  if (state.currentUser) localStorage.setItem('mf_active', state.currentUser.id);
+}
+
+// ═══════════════════════════════════
+// MODAL UTILS
+// ═══════════════════════════════════
+function openModal(id) { document.getElementById(id).classList.add('open'); }
+function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+function switchModal(from, to) { closeModal(from); openModal(to); }
+document.querySelectorAll('.modal-overlay').forEach(m => {
+  m.addEventListener('click', e => { if (e.target === m) m.classList.remove('open'); });
+});
+
+// ═══════════════════════════════════
+// TOAST
+// ═══════════════════════════════════
+function toast(msg, dur=2800) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), dur);
+}
+
+// ═══════════════════════════════════
+// AUTH
+// ═══════════════════════════════════
+function signUp() {
+  const fname  = document.getElementById('su-fname').value.trim();
+  const lname  = document.getElementById('su-lname').value.trim();
+  const email  = document.getElementById('su-email').value.trim().toLowerCase();
+  const pass   = document.getElementById('su-pass').value;
+  const age    = parseInt(document.getElementById('su-age').value);
+  const gender = document.getElementById('su-gender').value;
+  const weight = parseFloat(document.getElementById('su-weight').value);
+  const height = parseFloat(document.getElementById('su-height').value);
+  const cals   = parseFloat(document.getElementById('su-cals').value);
+  const errEl  = document.getElementById('signup-err');
+
+  function showErr(msg) { errEl.textContent = msg; errEl.classList.add('show'); }
+  errEl.classList.remove('show');
+
+  if (!fname || !lname)      return showErr('Please enter your full name.');
+  if (!email.includes('@'))  return showErr('Enter a valid email.');
+  if (pass.length < 6)       return showErr('Password must be at least 6 characters.');
+  if (!age || age < 10)      return showErr('Enter a valid age.');
+  if (!weight || weight < 30)return showErr('Enter a valid weight.');
+  if (!height || height < 100) return showErr('Enter a valid height.');
+  if (!cals || cals < 50)    return showErr('Enter a valid daily calorie goal.');
+  if (state.users.find(u => u.email === email)) return showErr('An account with this email already exists.');
+
+  const user = {
+    id: Date.now().toString(),
+    fname, lname, email,
+    password: btoa(pass),
+    age, gender, weight, height,
+    calorieGoal: cals
+  };
+  state.users.push(user);
+  state.currentUser = user;
+  saveState();
+  closeModal('modal-signup');
+  enterApp();
+}
+
+function logIn() {
+  const email = document.getElementById('li-email').value.trim().toLowerCase();
+  const pass  = document.getElementById('li-pass').value;
+  const errEl = document.getElementById('login-err');
+  errEl.classList.remove('show');
+
+  const user = state.users.find(u => u.email === email && u.password === btoa(pass));
+  if (!user) {
+    errEl.textContent = 'Incorrect email or password.';
+    errEl.classList.add('show');
+    return;
+  }
+  state.currentUser = user;
+  saveState();
+  closeModal('modal-login');
+  enterApp();
+}
+
+function logOut() {
+  state.currentUser = null;
+  localStorage.removeItem('mf_active');
+  closeModal('modal-profile');
+  showPage('page-landing');
+  toast('Logged out. See you soon! 👋');
+}
+
+function enterApp() {
+  goTo('dashboard');
+  toast(`Welcome, ${state.currentUser.fname}! 💪`);
+}
+
+// ═══════════════════════════════════
+// NAVIGATION
+// ═══════════════════════════════════
+function showPage(id) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+
+function goTo(section) {
+  if (!state.currentUser && section !== 'landing') { openModal('modal-login'); return; }
+  const map = { dashboard:'page-dashboard', log:'page-log', progress:'page-progress', health:'page-health', landing:'page-landing' };
+  showPage(map[section]);
+  updateNavActive(section);
+  updateAvatars();
+  if (section === 'dashboard') renderDashboard();
+  if (section === 'log')       renderLog();
+  if (section === 'progress')  renderProgress();
+}
+
+function updateNavActive(section) {
+  document.querySelectorAll('.nav-link').forEach(el => {
+    el.classList.toggle('active', el.textContent.trim().toLowerCase() === section ||
+      (section === 'dashboard' && el.textContent.trim() === 'Dashboard'));
+  });
+}
+
+function updateAvatars() {
+  const u = state.currentUser;
+  if (!u) return;
+  const init = (u.fname[0] + u.lname[0]).toUpperCase();
+  ['nav-avatar','nav-avatar-log','nav-avatar-prog','nav-avatar-health'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.textContent = init;
+  });
+}
+
+// ═══════════════════════════════════
+// PROFILE MODAL
+// ═══════════════════════════════════
+function openProfileModal() {
+  const u = state.currentUser; if (!u) return;
+  document.getElementById('ep-age').value    = u.age;
+  document.getElementById('ep-weight').value = u.weight;
+  document.getElementById('ep-height').value = u.height;
+  document.getElementById('ep-cals').value   = u.calorieGoal;
+  openModal('modal-profile');
+}
+
+function saveProfile() {
+  const u = state.currentUser; if (!u) return;
+  u.age         = parseInt(document.getElementById('ep-age').value)    || u.age;
+  u.weight      = parseFloat(document.getElementById('ep-weight').value) || u.weight;
+  u.height      = parseFloat(document.getElementById('ep-height').value) || u.height;
+  u.calorieGoal = parseFloat(document.getElementById('ep-cals').value) || u.calorieGoal;
+  const idx = state.users.findIndex(x => x.id === u.id);
+  state.users[idx] = u;
+  saveState();
+  closeModal('modal-profile');
+  toast('Profile updated ✓');
+  renderDashboard();
+}
+
+// ═══════════════════════════════════
+// WORKOUT LOG MODAL
+// ═══════════════════════════════════
+const CAL_RATE = { Running:10, Cycling:8, Swimming:9, Gym:7, Yoga:4, Walking:5 };
+const WK_ICON  = { Running:'🏃', Cycling:'🚴', Swimming:'🏊', Gym:'🏋️', Yoga:'🧘', Walking:'🚶' };
+
+function selectType(btn, type) {
+  document.querySelectorAll('.wtype-btn').forEach(b => b.classList.remove('selected'));
+  btn.classList.add('selected');
+  document.getElementById('log-type').value = type;
+  autoCalc();
+}
+
+function autoCalc() {
+  const type = document.getElementById('log-type').value;
+  const dur  = parseInt(document.getElementById('log-dur').value);
+  if (type && dur > 0) {
+    document.getElementById('log-cals').placeholder = Math.round((CAL_RATE[type]||8)*dur) + ' (auto)';
+  }
+}
+
+function openLogModal() {
+  // reset form
+  document.getElementById('log-type').value = '';
+  document.getElementById('log-dur').value  = '';
+  document.getElementById('log-cals').value = '';
+  document.getElementById('log-notes').value = '';
+  document.querySelectorAll('.wtype-btn').forEach(b => b.classList.remove('selected'));
+  document.getElementById('log-date').value = new Date().toISOString().split('T')[0];
+  openModal('modal-log');
+}
+
+function saveWorkout() {
+  const type  = document.getElementById('log-type').value;
+  const dur   = parseInt(document.getElementById('log-dur').value);
+  const cals  = parseFloat(document.getElementById('log-cals').value) || Math.round((CAL_RATE[type]||8)*dur);
+  const date  = document.getElementById('log-date').value;
+  const notes = document.getElementById('log-notes').value.trim();
+
+  if (!type) { toast('Please select a workout type'); return; }
+  if (!dur || dur < 1) { toast('Please enter a duration'); return; }
+  if (!date) { toast('Please select a date'); return; }
+
+  const w = {
+    id: Date.now().toString(),
+    userId: state.currentUser.id,
+    type, dur, cals, date, notes
+  };
+  state.workouts.push(w);
+  saveState();
+  closeModal('modal-log');
+  toast(`${type} logged — ${cals} kcal 🔥`);
+  renderDashboard();
+  renderLog();
+}
+
+// delete workout
+function deleteWorkout(id) {
+  state.workouts = state.workouts.filter(w => w.id !== id);
+  saveState();
+  renderDashboard();
+  renderLog();
+  toast('Workout deleted');
+}
+
+// ═══════════════════════════════════
+// HELPERS
+// ═══════════════════════════════════
+function myWorkouts() {
+  return state.workouts.filter(w => w.userId === state.currentUser?.id);
+}
+function todayStr() { return new Date().toISOString().split('T')[0]; }
+function weekStart() {
+  const d = new Date(); d.setDate(d.getDate() - d.getDay()); return d.toISOString().split('T')[0];
+}
+
+// ═══════════════════════════════════
+// RENDER DASHBOARD
+// ═══════════════════════════════════
+function renderDashboard() {
+  const u = state.currentUser; if (!u) return;
+  const wk = myWorkouts();
+  const today = todayStr();
+  const ws = weekStart();
+  const todayWk = wk.filter(w => w.date === today);
+  const weekWk  = wk.filter(w => w.date >= ws);
+
+  const burnedToday = todayWk.reduce((a,w)=>a+w.cals,0);
+  const minsToday   = todayWk.reduce((a,w)=>a+w.dur,0);
+  const weekBurned  = weekWk.reduce((a,w)=>a+w.cals,0);
+  const sessWeek    = weekWk.length;
+  const pct = Math.min(100, Math.round(burnedToday / u.calorieGoal * 100));
+
+  // Greeting
+  const hr = new Date().getHours();
+  const greet = hr<12?'GOOD MORNING':hr<18?'GOOD AFTERNOON':'GOOD EVENING';
+  document.getElementById('dash-greeting').textContent = greet + ', ' + u.fname.toUpperCase() + '!';
+  document.getElementById('dash-date').textContent = new Date().toLocaleDateString('en-US',{weekday:'long',year:'numeric',month:'long',day:'numeric'});
+
+  // Stats
+  document.getElementById('stat-burned').textContent  = burnedToday;
+  document.getElementById('stat-mins').textContent    = minsToday;
+  document.getElementById('stat-sessions').textContent= sessWeek;
+  document.getElementById('stat-weekly').textContent  = weekBurned;
+  document.getElementById('stat-goal-lbl').textContent= 'Goal: ' + u.calorieGoal;
+  document.getElementById('bar-burned').style.width   = pct + '%';
+  document.querySelector('#stat-burned-bar .goal-bar-label span').textContent = pct + '%';
+  document.getElementById('stat-mins-sub').textContent = minsToday>=30?'🎉 Active goal met!':'Target: 30+ min';
+  document.getElementById('stat-streak').textContent  = sessWeek + ' session' + (sessWeek!==1?'s':'') + ' this week';
+  document.getElementById('stat-weekly-goal').textContent = 'Goal: ' + (u.calorieGoal*7) + ' kcal';
+
+  // Ring
+  const circ = 2*Math.PI*58;
+  document.getElementById('ring-circle').style.strokeDashoffset = circ*(1-pct/100);
+  document.getElementById('ring-pct').textContent   = pct + '%';
+  document.getElementById('ring-sub').textContent   = burnedToday + ' / ' + u.calorieGoal + ' kcal';
+
+  // Profile mini
+  const bmi = (u.weight / ((u.height/100)**2)).toFixed(1);
+  document.getElementById('profile-mini').innerHTML = `
+    <div style="display:flex;justify-content:space-between;"><span style="color:var(--muted)">Age</span><span>${u.age} yrs</span></div>
+    <div style="display:flex;justify-content:space-between;"><span style="color:var(--muted)">Weight</span><span>${u.weight} kg</span></div>
+    <div style="display:flex;justify-content:space-between;"><span style="color:var(--muted)">Height</span><span>${u.height} cm</span></div>
+    <div style="display:flex;justify-content:space-between;"><span style="color:var(--muted)">BMI</span><span>${bmi}</span></div>
+    <div style="display:flex;justify-content:space-between;"><span style="color:var(--muted)">Daily Goal</span><span>${u.calorieGoal} kcal</span></div>
+  `;
+
+  // Recent workouts (last 5)
+  const recent = [...wk].sort((a,b)=>b.date.localeCompare(a.date)).slice(0,5);
+  const rl = document.getElementById('recent-list');
+  if (recent.length === 0) {
+    rl.innerHTML = `<div class="empty-state"><div class="es-icon">🏋️</div><p>No workouts yet. Log your first one!</p></div>`;
+  } else {
+    rl.innerHTML = recent.map(w => workoutItemHTML(w)).join('');
+  }
+}
+
+function workoutItemHTML(w) {
+  return `<div class="workout-item">
+    <div class="wi-icon">${WK_ICON[w.type]||'💪'}</div>
+    <div class="wi-info">
+      <div class="wi-name">${w.type}</div>
+      <div class="wi-meta">${w.date} · ${w.dur} min${w.notes?' · '+w.notes:''}</div>
+    </div>
+    <div class="wi-cals">${w.cals}<span> kcal</span></div>
+    <button onclick="deleteWorkout('${w.id}')" style="background:none;border:none;color:var(--muted);cursor:pointer;padding:4px 8px;font-size:1rem;" title="Delete">✕</button>
+  </div>`;
+}
+
+// ═══════════════════════════════════
+// RENDER LOG PAGE
+// ═══════════════════════════════════
+function renderLog() {
+  const typeFilter  = document.getElementById('filter-type')?.value  || '';
+  const rangeFilter = document.getElementById('filter-range')?.value || 'all';
+  let wk = myWorkouts();
+  if (typeFilter) wk = wk.filter(w => w.type === typeFilter);
+  if (rangeFilter === 'week')  wk = wk.filter(w => w.date >= weekStart());
+  if (rangeFilter === 'month') {
+    const m = new Date(); m.setDate(1);
+    wk = wk.filter(w => w.date >= m.toISOString().split('T')[0]);
+  }
+  wk.sort((a,b) => b.date.localeCompare(a.date));
+
+  const lbl = document.getElementById('log-count-lbl');
+  if (lbl) lbl.textContent = wk.length + ' workout' + (wk.length!==1?'s':'') + ' found';
+
+  const el = document.getElementById('full-log-list');
+  if (!el) return;
+  if (wk.length === 0) {
+    el.innerHTML = `<div class="empty-state"><div class="es-icon">📋</div><p>No workouts match your filter.<br>Try logging one!</p></div>`;
+  } else {
+    el.innerHTML = wk.map(w => workoutItemHTML(w)).join('');
+  }
+}
+
+// ═══════════════════════════════════
+// RENDER PROGRESS PAGE
+// ═══════════════════════════════════
+let progressChartInstance = null;
+
+function renderProgress() {
+  const u = state.currentUser; if (!u) return;
+  const wk = myWorkouts();
+
+  // All-time stats
+  const totalBurned  = wk.reduce((a,w)=>a+w.cals,0);
+  const totalMins    = wk.reduce((a,w)=>a+w.dur,0);
+  const totalSess    = wk.length;
+  const avgCals      = totalSess ? Math.round(totalBurned/totalSess) : 0;
+  document.getElementById('all-burned').textContent   = totalBurned;
+  document.getElementById('all-mins').textContent     = totalMins;
+  document.getElementById('all-sessions').textContent = totalSess;
+  document.getElementById('all-avg').textContent      = avgCals;
+
+  // Last 7 days chart data
+  const days = [], labels = [], data = [];
+  for (let i=6; i>=0; i--) {
+    const d = new Date(); d.setDate(d.getDate()-i);
+    const ds = d.toISOString().split('T')[0];
+    days.push(ds);
+    labels.push(d.toLocaleDateString('en-US',{weekday:'short'}));
+    data.push(wk.filter(w=>w.date===ds).reduce((a,w)=>a+w.cals,0));
+  }
+
+  document.getElementById('chart-total-lbl').textContent = data.reduce((a,b)=>a+b,0) + ' kcal total';
+
+  // Chart.js
+  const ctx = document.getElementById('progressChart').getContext('2d');
+  if (progressChartInstance) progressChartInstance.destroy();
+  progressChartInstance = new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels,
+      datasets: [{
+        label: 'Calories Burned',
+        data,
+        backgroundColor: data.map((v,i)=>i===6?'rgba(198,241,53,.85)':'rgba(198,241,53,.3)'),
+        borderColor: 'rgba(198,241,53,.9)',
+        borderWidth: 1.5,
+        borderRadius: 6,
+      }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { display:false }, tooltip: {
+        backgroundColor:'#1e2330', titleColor:'#e8ecf5', bodyColor:'#c6f135',
+        borderColor:'#2a3042', borderWidth:1,
+        callbacks: { label: ctx => ' ' + ctx.parsed.y + ' kcal' }
+      }},
+      scales: {
+        x: { grid:{color:'rgba(255,255,255,.04)'}, ticks:{color:'#6b7590'} },
+        y: { grid:{color:'rgba(255,255,255,.06)'}, ticks:{color:'#6b7590'},
+             beginAtZero:true, suggestedMax: Math.max(...data, u.calorieGoal)+50 }
+      }
+    }
+  });
+
+  // Week bars
+  const maxVal = Math.max(...data, 1);
+  document.getElementById('week-bars').innerHTML = days.map((ds,i)=>`
+    <div class="wbar-row">
+      <div class="wbar-day">${labels[i]}</div>
+      <div class="wbar-track"><div class="wbar-fill" style="width:${Math.round(data[i]/maxVal*100)}%"></div></div>
+      <div class="wbar-val">${data[i]} kcal</div>
+    </div>`).join('');
+
+  // BMI
+  const bmi = u.weight / ((u.height/100)**2);
+  const bmiVal = bmi.toFixed(1);
+  let cat='', tip='', pct=0;
+  if(bmi<18.5){ cat='Underweight'; tip='Consider eating more nutrient-dense foods and strength training.'; pct=10; }
+  else if(bmi<25){ cat='Normal weight 🎉'; tip="You're in a healthy BMI range. Keep up your active lifestyle!"; pct=38; }
+  else if(bmi<30){ cat='Overweight'; tip='Regular cardio and a slight calorie deficit can help reach a healthier weight.'; pct=65; }
+  else{ cat='Obese'; tip='Consider speaking with a healthcare provider about a personalised plan.'; pct=88; }
+
+  document.getElementById('bmi-val').textContent      = bmiVal;
+  document.getElementById('bmi-category').textContent = cat;
+  document.getElementById('bmi-needle').style.left    = pct + '%';
+  document.getElementById('bmi-tip').textContent      = tip;
+}
+
+// ═══════════════════════════════════
+// INIT
+// ═══════════════════════════════════
+loadState();
+if (state.currentUser) {
+  enterApp();
+} else {
+  showPage('page-landing');
+}
+
+// Set today's date in log modal by default
+document.getElementById('log-date').value = new Date().toISOString().split('T')[0];
+
+// Override log button to reset properly
+document.querySelectorAll('[onclick="openModal(\'modal-log\')"]').forEach(btn => {
+  btn.setAttribute('onclick', 'openLogModal()');
+});
+</script>
+</body>
+</html>
