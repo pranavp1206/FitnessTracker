@@ -1,7 +1,13 @@
+/* 1. IMPORTS & RESETS */
+/* Imports our custom fonts from Google Fonts: 'Bebas Neue' for large headers, 'DM Sans' for normal text */
 @import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;600&display=swap');
 
+/* Global Reset: Removes default browser margins/padding and ensures consistent sizing across all browsers */
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
+/* 2. CSS VARIABLES (DESIGN SYSTEM) */
+/* Defines the color palette and fonts used throughout the app. 
+   Changing a color here will update it everywhere automatically. */
 :root {
   --bg: #0d0f14; --surface: #161a23; --card: #1e2330;
   --border: #2a3042; --accent: #c6f135; --muted: #6b7590;
@@ -9,14 +15,19 @@
   --display: 'Bebas Neue', sans-serif; --body: 'DM Sans', sans-serif;
 }
 
+/* 3. BASE STYLES */
+/* Sets the base background color, text color, font, and ensures the page takes up at least the full screen height */
 body { background: var(--bg); color: var(--text); font-family: var(--body); min-height: 100vh; }
 
-/* layout */
+/* 4. LAYOUT COMPONENTS */
+/* .page and .wrap control the main content area of the Dashboard, Log, and Progress screens.
+   The 'fadeUp' animation makes these pages smoothly slide into view when navigating. */
 .page { min-height: 100vh; display: flex; flex-direction: column; animation: fadeUp .3s ease; }
 @keyframes fadeUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; } }
 .wrap { max-width: 1000px; margin: 0 auto; padding: 28px 20px; width: 100%; flex: 1; }
 
-/* nav */
+/* 5. NAVIGATION BAR */
+/* Styles the top header, including the brand logo, navigation buttons, and the user's circular avatar */
 nav { display: flex; align-items: center; gap: 6px; padding: 0 20px; height: 58px;
       background: var(--surface); border-bottom: 1px solid var(--border); position: sticky; top: 0; z-index: 10; }
 .brand { font-family: var(--display); font-size: 1.5rem; color: var(--text); margin-right: 16px; }
@@ -29,9 +40,12 @@ nav { display: flex; align-items: center; gap: 6px; padding: 0 20px; height: 58p
           background: linear-gradient(135deg, var(--accent), #4ade80); color: #0d0f14;
           font-weight: 700; font-size: .82rem; display: flex; align-items: center; justify-content: center; cursor: pointer; }
 
-/* cards */
+/* 6. CARDS & STATISTICS */
+/* .grid-4 creates a responsive 4-column layout for the top statistics on the Dashboard and Progress pages */
 .card { background: var(--card); border: 1px solid var(--border); border-radius: var(--r); padding: 20px; }
 .grid-4 { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 14px; margin-bottom: 22px; }
+
+/* .stat-card styles the individual boxes showing "Calories Burned", "Total Workouts", etc. */
 .stat-card { background: var(--card); border: 1px solid var(--border); border-radius: var(--r);
               padding: 18px; transition: .2s; cursor: default; }
 .stat-card:hover { border-color: var(--accent); transform: translateY(-2px); }
@@ -39,12 +53,14 @@ nav { display: flex; align-items: center; gap: 6px; padding: 0 20px; height: 58p
 .stat-lbl { font-size: .75rem; color: var(--muted); text-transform: uppercase; letter-spacing: .07em; margin-top: 2px; }
 .stat-sub { font-size: .8rem; color: #4ade80; margin-top: 4px; }
 
-/* goal bar */
+/* 7. GOAL PROGRESS BARS */
+/* Used inside StatCards to show horizontal progress towards a goal (e.g., Daily Calorie Goal) */
 .bar-track { height: 6px; background: var(--border); border-radius: 99px; overflow: hidden; margin: 6px 0 3px; }
 .bar-fill  { height: 100%; border-radius: 99px; background: linear-gradient(90deg, var(--accent), #4ade80); transition: width .5s; }
 .bar-lbls  { display: flex; justify-content: space-between; font-size: .72rem; color: var(--muted); }
 
-/* workout items */
+/* 8. WORKOUT LIST ITEMS */
+/* Styles the individual rows representing a logged workout (shows the emoji icon, name, duration, and calories) */
 .wk-item { display: flex; align-items: center; gap: 12px; padding: 13px 15px;
             background: var(--surface); border: 1px solid var(--border); border-radius: 10px; margin-bottom: 10px; }
 .wk-icon { width: 38px; height: 38px; border-radius: 9px; background: rgba(198,241,53,.1);
@@ -56,7 +72,8 @@ nav { display: flex; align-items: center; gap: 6px; padding: 0 20px; height: 58p
 .del-btn { background: none; border: none; color: var(--muted); cursor: pointer; font-size: 1rem; padding: 4px 8px; }
 .del-btn:hover { color: var(--danger); }
 
-/* buttons */
+/* 9. BUTTONS */
+/* Global button styles. .btn-primary is the solid green button, .btn-ghost is outlined, .btn-danger is red. */
 .btn { display: inline-flex; align-items: center; padding: 10px 22px; border-radius: var(--r);
         font-family: var(--body); font-weight: 600; font-size: .9rem; cursor: pointer; border: none; transition: .2s; }
 .btn-primary { background: var(--accent); color: #0d0f14; }
@@ -67,7 +84,9 @@ nav { display: flex; align-items: center; gap: 6px; padding: 0 20px; height: 58p
 .btn-full { width: 100%; justify-content: center; margin-top: 8px; }
 .btn-sm { padding: 7px 15px; font-size: .82rem; }
 
-/* modal */
+/* 10. OVERLAYS & MODALS */
+/* .overlay creates the dark, blurred background when a popup opens. 
+   .modal is the white box itself used for Sign Up, Login, and Logging Workouts. */
 .overlay { position: fixed; inset: 0; background: rgba(0,0,0,.7); backdrop-filter: blur(5px);
             display: flex; align-items: center; justify-content: center; z-index: 50; padding: 16px; }
 .modal { background: var(--card); border: 1px solid var(--border); border-radius: 18px;
@@ -76,7 +95,8 @@ nav { display: flex; align-items: center; gap: 6px; padding: 0 20px; height: 58p
 .modal-sub { font-size: .85rem; color: var(--muted); margin-bottom: 22px; }
 .close-btn { float: right; background: none; border: none; color: var(--muted); font-size: 1.3rem; cursor: pointer; }
 
-/* form */
+/* 11. FORMS & INPUTS */
+/* Styles for labels, text inputs, select dropdowns, and error messages used in the Modals and Contact Page */
 .field { margin-bottom: 14px; }
 .row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
 label { display: block; font-size: .75rem; font-weight: 600; color: var(--muted);
@@ -95,14 +115,16 @@ select option { background: var(--card); }
 .modal-foot { text-align: center; margin-top: 16px; font-size: .83rem; color: var(--muted); }
 .modal-foot a { color: var(--accent); cursor: pointer; font-weight: 600; }
 
-/* workout type picker */
+/* 12. WORKOUT TYPE PICKER */
+/* Styles the 3x2 grid of selectable buttons (Running, Cycling, etc.) inside the Log Workout Modal */
 .type-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 8px; margin-bottom: 16px; }
 .type-btn { display: flex; flex-direction: column; align-items: center; gap: 4px; padding: 12px 6px;
             border-radius: 10px; background: var(--surface); border: 1.5px solid var(--border);
             color: var(--muted); font-family: var(--body); font-size: .78rem; cursor: pointer; transition: .2s; }
 .type-btn:hover, .type-btn.sel { border-color: var(--accent); color: var(--accent); background: rgba(198,241,53,.08); }
 
-/* landing */
+/* 13. LANDING / ABOUT PAGE */
+/* Styles the full-screen cinematic intro with the glowing grid background and staggered fade-in animations */
 .landing { display: flex; flex-direction: column; align-items: center; justify-content: center;
             min-height: 100vh; text-align: center; padding: 40px 20px;
             background: radial-gradient(ellipse 80% 60% at 60% 40%, #1a2e0e 0%, var(--bg) 70%);
@@ -129,17 +151,20 @@ select option { background: var(--card); }
 
 @keyframes fadeIn { from { opacity:0; transform:translateY(12px); } to { opacity:1; transform:none; } }
 
-/* empty state */
+/* 14. EMPTY STATES */
+/* Used on the Log or Dashboard when a user has no workouts logged to show a friendly placeholder message */
 .empty { text-align: center; padding: 36px; color: var(--muted); }
 .empty .ico { font-size: 2.4rem; margin-bottom: 10px; }
 
-/* toast */
+/* 15. TOAST NOTIFICATIONS */
+/* The small popup that slides up from the bottom right corner (e.g., "Workout saved!") */
 .toast { position: fixed; bottom: 24px; right: 24px; background: var(--card);
           border: 1px solid var(--border); border-left: 4px solid var(--accent);
           padding: 12px 18px; border-radius: 10px; font-size: .88rem; font-weight: 500;
           animation: fadeUp .3s ease; z-index: 100; }
 
-/* progress page */
+/* 16. PROGRESS PAGE CHARTS */
+/* .prog-grid and .wbar style the 7-day bar charts and the BMI calculator visualization on the Progress Page */
 .prog-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; margin-top: 20px; }
 @media(max-width:640px) { .prog-grid { grid-template-columns: 1fr; } }
 .wbar { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
@@ -148,10 +173,12 @@ select option { background: var(--card); }
 .wbar-fill { height: 100%; background: linear-gradient(90deg, var(--accent), #4ade80); border-radius: 99px; transition: width .5s; }
 .wbar-val { width: 50px; font-size: .75rem; color: var(--muted); text-align: right; }
 
-/* ring */
+/* 17. DASHBOARD SVG PROGRESS RING */
+/* Styles the circular calorie progress ring text on the Dashboard */
 .ring-wrap { display: flex; flex-direction: column; align-items: center; padding: 10px 0; }
 .ring-num { font-family: var(--display); font-size: 2.2rem; color: var(--accent); }
 
-/* row util */
+/* 18. UTILITY CLASSES */
+/* Helper classes like .row for horizontal alignment and .page-title for large page headers */
 .row { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px; margin-bottom: 20px; }
 .page-title { font-family: var(--display); font-size: 2.4rem; letter-spacing: .03em; }
