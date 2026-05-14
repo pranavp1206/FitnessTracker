@@ -4,12 +4,11 @@
 MyFitness is a modern, responsive web application designed to help users track their daily health and fitness goals. The theme revolves around physical well-being, providing users with an intuitive dashboard to log workouts, track calories burned against daily goals, and monitor long-term progress using interactive charts and BMI calculators.
 
 ## Team Members
-*Please fill in the names of the team members who contributed to this project:*
-- **[Name 1]**: Frontend Developer / UI Design
-- **[Name 2]**: Frontend Developer / Logic & Components
-- **[Name 3]**: Documentation & Quality Assurance
-- **[Name 4]**: Project Manager / Testing
-- **[Name 5]**: [Role, if applicable]
+Harishankar
+Sreegovind
+Maheswar
+Navdeep
+Pranav
 
 ## Technologies Used
 - **HTML5**: Semantic structuring of the web application.
